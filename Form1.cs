@@ -8,11 +8,24 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
+/* TODO: 
+    * ====================
+    * 1. add step 
+    * 2. replace richtextbox -> textBox with multiline 
+    * 3. Add new class, base is Point
+    * 4. GetPoint -> GetRandomSpecimen, step to double, (max-min) * r.nextDouble + min
+    * 5. GenerateArray -> GenerateRandomPopulation 
+    * 6. MinFunction - удалить, а брать arr[0]
+    * 7. Вывод в richtextbox, а вывести в переменную и в конце логи засунуть
+    * 8. 
+    * 
+*/
+
 namespace GeneticAlgorithm
 {
     public partial class Form1 : Form
     {
-
+        protected Random rand = new Random();
         protected int X1 = -10;
         protected int X2 = 10;
         protected int Y1 = -10;
@@ -25,6 +38,8 @@ namespace GeneticAlgorithm
 
         protected double f(double x, double y)
             => (1 - x) * (1 - x) + 100 * (y - x * x) * (y - x * x);
+
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -53,8 +68,7 @@ namespace GeneticAlgorithm
 
         protected Point GetPoint()
         {
-            var r = new Random();
-            return new Point(r.Next(X1, X2), r.Next(Y1, Y2));
+            return new Point(rand.Next(X1, X2), rand.Next(Y1, Y2));
         }
 
         protected Point[] GenerateArray(int count)
@@ -79,24 +93,6 @@ namespace GeneticAlgorithm
             return m;
         }
 
-        protected Point TournamentSelection(Point[] population, int tournamentSize)
-        {
-            Random random = new Random();
-            Point bestChromosome = new Point();
-
-            for (int i = 0; i < tournamentSize; i++)
-            {
-                Point candidate = population[random.Next(population.Length)];
-
-                if (bestChromosome == null || f(candidate.X, candidate.Y) < f(bestChromosome.X, bestChromosome.Y))
-                {
-                    bestChromosome = candidate;
-                }
-            }
-
-            return bestChromosome;
-        }
-
         protected Point[] SelectParents(Point[] population)
         {
             population.OrderBy(p => f(p.X, p.Y));
@@ -117,12 +113,11 @@ namespace GeneticAlgorithm
 
         protected int GetIndexParent(int count)
         {
-            var r = new Random();
             double step = 1 / count;
-            int place = r.Next(count - 1);
+            int place = rand.Next(count - 1);
             double coef = step * place;
 
-            while (coef > r.NextDouble() + step)
+            while (coef > rand.NextDouble() + step)
             {
                 place = r.Next(count - 1);
                 coef = step * place;
@@ -133,14 +128,13 @@ namespace GeneticAlgorithm
 
         protected Point[] Multiplication(Point[] chromosomes)
         {
-            var r = new Random();
             var count = chromosomes.Length / 2;
             for (var index = count; index < chromosomes.Length; index++)
             {
 
                 var a = chromosomes[GetIndexParent(index)];
                 var b = chromosomes[GetIndexParent(index)];
-                var child = new Point((r.NextDouble() > 0.5) ? a.X : b.X, (r.NextDouble() > 0.5) ? a.Y : b.Y);
+                var child = new Point((rand.NextDouble() > 0.5) ? a.X : b.X, (rand.NextDouble() > 0.5) ? a.Y : b.Y);
                 chromosomes[index] = child;
             }
             return chromosomes;
