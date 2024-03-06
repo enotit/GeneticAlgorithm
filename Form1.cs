@@ -31,8 +31,6 @@ namespace GeneticAlgorithm
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            var a = new VisualRoom();
-            Console.WriteLine(a.GetVisualRoom());
             Render();
         }
 
