@@ -52,8 +52,16 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Items\FloorLamp.cs" />
+    <Compile Include="Items\Item.cs" />
+    <Compile Include="Items\Sofa.cs" />
+    <Compile Include="Items\Table.cs" />
+    <Compile Include="Items\TV.cs" />
+    <Compile Include="Items\Wardrobe.cs" />
+    <Compile Include="Point.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VisualRoom.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

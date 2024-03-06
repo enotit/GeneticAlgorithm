@@ -8,18 +8,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-/* TODO: 
-    * ====================
-    * 1. add step 
-    * 2. replace richtextbox -> textBox with multiline 
-    * 3. Add new class, base is Point
-    * 4. GetPoint -> GetRandomSpecimen, step to double, (max-min) * r.nextDouble + min
-    * 5. GenerateArray -> GenerateRandomPopulation 
-    * 6. MinFunction - удалить, а брать arr[0]
-    * 7. Вывод в richtextbox, а вывести в переменную и в конце логи засунуть
-    * 8. 
-    * 
-*/
 
 namespace GeneticAlgorithm
 {
@@ -43,40 +31,44 @@ namespace GeneticAlgorithm
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            var a = new VisualRoom();
+            Console.WriteLine(a.GetVisualRoom());
             Render();
         }
 
         protected void Render()
         {
-            richTextBox1.Text = "\t";
+            string logs = "";
+            logs = "\t";
             for (int x = X1; x <= X2; x++)
-                richTextBox1.Text += x + "\t";
-            richTextBox1.Text += "\n";
+                logs += x + "\t";
+            logs += Environment.NewLine;
 
             for (int y = Y1; y <= Y2; y++)
             {
-                richTextBox1.Text += y + "\t";
+                logs += y + "\t";
 
                 for (int x = X1; x <= X2; x++)
                 {
-                    richTextBox1.Text += f(x, y) + "\t";
+                    logs += f(x, y) + "\t";
                 }
-                richTextBox1.Text += '\n';
+                logs += Environment.NewLine;
 
             }
+            textBox1.Text = logs;
         }
 
-        protected Point GetPoint()
+        protected Point GetRandomSpecimen()
         {
             return new Point(rand.Next(X1, X2), rand.Next(Y1, Y2));
         }
 
-        protected Point[] GenerateArray(int count)
+        protected Point[] GenerateRandomPopulation(int count)
         {
             Point[] chromosomes = new Point[count];
             for (int c = 0; c < chromosomes.Length; c++)
             {
-                chromosomes[c] = GetPoint();
+                chromosomes[c] = GetRandomSpecimen();
             }
             return chromosomes;
         }
@@ -119,7 +111,7 @@ namespace GeneticAlgorithm
 
             while (coef > rand.NextDouble() + step)
             {
-                place = r.Next(count - 1);
+                place = rand.Next(count - 1);
                 coef = step * place;
             }
 
@@ -142,8 +134,8 @@ namespace GeneticAlgorithm
 
         protected int Algorithm(int countChromosomes, int maxIteration)
         {
-            Point[] chromosomes = GenerateArray(countChromosomes);
-
+            Point[] chromosomes = GenerateRandomPopulation(countChromosomes);
+            string logs = "";
             int iteration = 0;
             double min = MinFunction(chromosomes);
             List<double> history = new List<double> ();
@@ -155,19 +147,20 @@ namespace GeneticAlgorithm
 
                 if (history.Count > 2 && min == history.Last() && min == history[history.Count - 2])
                 {
-                    chromosomes = GenerateArray(countChromosomes);
+                    chromosomes = GenerateRandomPopulation(countChromosomes);
                     min = MinFunction(chromosomes);
                     history.Clear();
-                    richTextBox1.Text += "Произошла встряска\n";
+                    logs += $"Произошла встряска{Environment.NewLine}";
                 }
 
                 history.Add(min);
 
                 iteration++;
-                richTextBox1.Text += GetDescriptionIteration(iteration, chromosomes) + $"Минимум: {min}\n";
+                logs += GetDescriptionIteration(iteration, chromosomes) + $"Минимум: {min}{Environment.NewLine}";
             }
 
             iterationCount.Text = $"Результат за {iteration} итераций";
+            textBox1.Text += logs;
             return iteration;
         }
 
@@ -213,7 +206,7 @@ namespace GeneticAlgorithm
         }
 
         protected string GetDescriptionIteration(int iteration, Point[] points)
-            => $"\nИтерация: {iteration}\n{string.Join(", ", points.Select(p => GetDescriptionForPoint(p)))}\n";
+            => $"{Environment.NewLine}Итерация: {iteration}{Environment.NewLine}{string.Join(", ", points.Select(p => GetDescriptionForPoint(p)))}{Environment.NewLine}";
         protected string GetDescriptionForPoint(Point p)
             => $"f({p.X}, {p.Y}) = {f(p.X, p.Y)}";
 
@@ -241,6 +234,11 @@ namespace GeneticAlgorithm
             {
                 MessageBox.Show("ERROR value (chromosoms only int and >3)");
             }
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
