@@ -13,95 +13,70 @@ namespace GeneticAlgorithm
 {
     public partial class Form1 : Form
     {
-        protected Random rand = new Random();
-        protected int X1 = -10;
-        protected int X2 = 10;
-        protected int Y1 = -10;
-        protected int Y2 = 10;
-
+        public List<PersonRoom> population = new List<PersonRoom>();
+        public PersonRoom Min = null;
+        public Random rand = new Random();
         public Form1()
         {
             InitializeComponent();
         }
 
-        protected double f(double x, double y)
-            => (1 - x) * (1 - x) + 100 * (y - x * x) * (y - x * x);
-
-
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Render();
+            // Render();
         }
 
         protected void Render()
         {
-            string logs = "";
-            logs = "\t";
-            for (int x = X1; x <= X2; x++)
-                logs += x + "\t";
-            logs += Environment.NewLine;
+            
+        }
 
-            for (int y = Y1; y <= Y2; y++)
+        protected void GenerateRandomPopulation(int count)
+        {
+            population.Clear();
+            for (int c = 0; c < count; c++)
             {
-                logs += y + "\t";
-
-                for (int x = X1; x <= X2; x++)
-                {
-                    logs += f(x, y) + "\t";
-                }
-                logs += Environment.NewLine;
-
+                var pr = new PersonRoom();
+                pr.CreateRandomPopulation();
+                population.Add(pr);
             }
-            textBox1.Text = logs;
         }
-
-        protected Point GetRandomSpecimen()
+        protected float MinFunction()
         {
-            return new Point(rand.Next(X1, X2), rand.Next(Y1, Y2));
-        }
-
-        protected Point[] GenerateRandomPopulation(int count)
-        {
-            Point[] chromosomes = new Point[count];
-            for (int c = 0; c < chromosomes.Length; c++)
+            float m = population[0].GetValueFitnessFunction();
+            foreach (var p in population)
             {
-                chromosomes[c] = GetRandomSpecimen();
-            }
-            return chromosomes;
-        }
-        protected double MinFunction(Point[] chromosomes)
-        {
-            double m = f(chromosomes[0].X, chromosomes[0].Y);
-            foreach (var c in chromosomes)
-            {
-                var v = f(c.X, c.Y);
-                if (m > v) m = v;
-
-                if (m == 0) break;
+                float v = p.GetValueFitnessFunction();
+                if (m > v) 
+                    m = v;
+                if (v < Min.GetValueFitnessFunction())
+                    Min = p;
             }
             return m;
         }
 
-        protected Point[] SelectParents(Point[] population)
+        protected List<PersonRoom> SelectParents()
         {
-            population.OrderBy(p => f(p.X, p.Y));
-            List<Point> parents = new List<Point>();
+            population = population.OrderBy(p => p.GetValueFitnessFunction()).ToList();
+            List<PersonRoom> parents = new List<PersonRoom>();
 
-            for (int i = 0; i < population.Length / 2; i++)
+            for (int i = 0; i < population.Count / 2; i++)
             {
                 parents.Add(population[i]);
             }
 
-            for (int i = 0; i < population.Length / 2; i++)
+            for (int i = 0; i < population.Count / 2; i++)
             {
-                parents.Add(new Point());
+                var pr = new PersonRoom();
+                pr.CreateRandomPopulation();
+                parents.Add(pr);
             }
 
-            return parents.ToArray();
+            return parents;
         }
 
-        protected int GetIndexParent(int count)
+        protected int GetRandomIndex(int count)
         {
             double step = 1 / count;
             int place = rand.Next(count - 1);
@@ -116,37 +91,39 @@ namespace GeneticAlgorithm
             return place;
         }
 
-        protected Point[] Multiplication(Point[] chromosomes)
+        protected void Multiplication()
         {
-            var count = chromosomes.Length / 2;
-            for (var index = count; index < chromosomes.Length; index++)
+            var count = population.Count / 2;
+            for (var index = count; index < population.Count; index++)
             {
 
-                var a = chromosomes[GetIndexParent(index)];
-                var b = chromosomes[GetIndexParent(index)];
-                var child = new Point((rand.NextDouble() > 0.5) ? a.X : b.X, (rand.NextDouble() > 0.5) ? a.Y : b.Y);
-                chromosomes[index] = child;
+                var a = population[GetRandomIndex(index)];
+                var b = population[GetRandomIndex(index)];
+                var child = new PersonRoom();
+                child.Items = new List<Item>(a.Items).ToArray(); // copy
+                child.Multiplication(b);
+                population[index] = child;
             }
-            return chromosomes;
         }
 
         protected int Algorithm(int countChromosomes, int maxIteration)
         {
-            Point[] chromosomes = GenerateRandomPopulation(countChromosomes);
-            string logs = "";
+            GenerateRandomPopulation(countChromosomes);
+            Min = population[0];
+            string logs = GetDescriptionIteration(0);
             int iteration = 0;
-            double min = MinFunction(chromosomes);
+            float min = MinFunction();
             List<double> history = new List<double> ();
             while (min != 0 && iteration < maxIteration)
             {
-                chromosomes = SelectParents(chromosomes);
-                chromosomes = Multiplication(chromosomes);
-                min = MinFunction(chromosomes);
+                population = SelectParents();
+                Multiplication();
+                min = MinFunction();
 
-                if (history.Count > 2 && min == history.Last() && min == history[history.Count - 2])
+                if (history.Count > 5 && min == history.Last() && min == history[history.Count - 5])
                 {
-                    chromosomes = GenerateRandomPopulation(countChromosomes);
-                    min = MinFunction(chromosomes);
+                    GenerateRandomPopulation(countChromosomes);
+                    min = MinFunction();
                     history.Clear();
                     logs += $"Произошла встряска{Environment.NewLine}";
                 }
@@ -154,63 +131,22 @@ namespace GeneticAlgorithm
                 history.Add(min);
 
                 iteration++;
-                logs += GetDescriptionIteration(iteration, chromosomes) + $"Минимум: {min}{Environment.NewLine}";
+                Console.Write(iteration);
+                logs += GetDescriptionIteration(iteration) + $"Минимум: {min}{Environment.NewLine}";
             }
 
             iterationCount.Text = $"Результат за {iteration} итераций";
+            minfuction.Text = $"{Min.GetInfo()} = {Min.GetValueFitnessFunction()}";
+            resultMinFunction.Text = Min.GetVisualRoom();
             textBox1.Text += logs;
             return iteration;
         }
 
-        protected void SaveValues()
-        {
-            int temp;
-            if (int.TryParse(X1box.Text, out temp))
-            {
-                X1 = temp;
-            }
-            else
-            {
-                MessageBox.Show("ERROR value (x1-y2 only int)");
-            }
-
-            if (int.TryParse(X2box.Text, out temp))
-            {
-                X2 = temp;
-            }
-            else
-            {
-                MessageBox.Show("ERROR value (x1-y2 only int)");
-            }
-
-            if (int.TryParse(Y1box.Text, out temp))
-            {
-                Y1 = temp;
-            }
-            else
-            {
-                MessageBox.Show("ERROR value (x1-y2 only int)");
-            }
-
-            if (int.TryParse(Y2box.Text, out temp))
-            {
-                Y2 = temp;
-            }
-            else
-            {
-                MessageBox.Show("ERROR value (x1-y2 only int)");
-            }
-
-        }
-
-        protected string GetDescriptionIteration(int iteration, Point[] points)
-            => $"{Environment.NewLine}Итерация: {iteration}{Environment.NewLine}{string.Join(", ", points.Select(p => GetDescriptionForPoint(p)))}{Environment.NewLine}";
-        protected string GetDescriptionForPoint(Point p)
-            => $"f({p.X}, {p.Y}) = {f(p.X, p.Y)}";
+        protected string GetDescriptionIteration(int iteration)
+            => $"{Environment.NewLine}Итерация: {iteration}{Environment.NewLine}{string.Join(Environment.NewLine, population.Select(p => p.GetInfo()))}{Environment.NewLine}";
 
         private void generation_Click(object sender, EventArgs e)
         {
-            SaveValues();
             Render();
         }
 
@@ -221,6 +157,7 @@ namespace GeneticAlgorithm
                 int count = temp;
                 if (int.TryParse(maxIteration.Text, out temp))
                 {
+                    textBox1.Text = "";
                     Algorithm(count, temp);
                 }
                 else

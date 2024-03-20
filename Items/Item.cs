@@ -1,16 +1,19 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
 namespace GeneticAlgorithm
 {
-    public class Item
+    public abstract class Item
     {
+        abstract public string Name { get;}
+        abstract public string ShortName { get;}
+
         public int SizeWidth;
         public int SizeLength;
         public Point CurrentPosition;
+        private float CachedWeight = -1f;
 
         public Item(int sizeWidth, int sizeLength, Point currentPosition)
         {
@@ -19,21 +22,30 @@ namespace GeneticAlgorithm
             CurrentPosition = currentPosition;
         }
 
-        // OVERRIDE!
-        public float getWeight(List<Item> items) {
-            float result = 0;
-
-            foreach (Item item in items)
+        public float GetWeight(Item[] items)
+        {
+            if (CachedWeight == -1f) 
             {
-                if (item.GetType().Name == this.GetType().Name)
+                CachedWeight = Algorithm(items);
+                foreach (Item item in items)
                 {
-                    result += CurrentPosition.DistanceTo(item.CurrentPosition);
+                    if (item != this) { 
+                        CachedWeight += IsCollision(item) ? SizeWidth + SizeLength : 0;
+                    }
                 }
             }
-
-            return result;
+            return CachedWeight;
         }
 
-        
+        public void Refresh() { CachedWeight = -1; }
+
+        // @override
+        virtual protected float Algorithm(Item[] items) {
+            return 0;
+        }
+
+        public bool IsCollision(Item item)
+        => CurrentPosition.X < item.CurrentPosition.X + item.SizeLength && CurrentPosition.X + SizeLength > item.CurrentPosition.X &&
+            CurrentPosition.Y < item.CurrentPosition.Y + item.SizeWidth && CurrentPosition.Y + SizeWidth > item.CurrentPosition.Y;
     }
 }

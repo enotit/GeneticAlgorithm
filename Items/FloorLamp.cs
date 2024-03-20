@@ -8,8 +8,24 @@ namespace GeneticAlgorithm.Items
 {
     public class FloorLamp : Item
     {
-        public FloorLamp(int sizeWidth, int sizeLength, Point currentPosition) : base(sizeWidth, sizeLength, currentPosition)
+        public FloorLamp(Point currentPosition, int sizeWidth = 1, int sizeLength = 1) : base(sizeWidth, sizeLength, currentPosition)
         {
+        }
+
+        public override string ShortName => "FL";
+        public override string Name => "Напольная лампа";
+
+        override protected float Algorithm(Item[] items)
+        {
+            float f = 0;
+            foreach (Item item in items)
+            {
+                if (item.GetType() ==  typeof(Sofa))
+                {
+                    f += Math.Max(0, item.CurrentPosition.DistanceTo(this.CurrentPosition) - 1);
+                }
+            }
+            return f;
         }
     }
 }

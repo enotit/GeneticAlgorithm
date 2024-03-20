@@ -8,8 +8,11 @@ namespace GeneticAlgorithm.Items
 {
     public class Wardrobe : Item
     {
-        public Wardrobe(int sizeWidth, int sizeLength, Point currentPosition) : base(sizeWidth, sizeLength, currentPosition)
+        public Wardrobe(Point currentPosition, int sizeWidth = 4, int sizeLength = 1) : base(sizeWidth, sizeLength, currentPosition)
         {
         }
+
+        public override string ShortName => "W";
+        public override string Name => "Шкаф";
     }
 }
