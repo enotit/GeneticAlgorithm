@@ -12,7 +12,7 @@ namespace GeneticAlgorithm
 {
     public partial class Form1 : Form
     {
-
+        public static Random r = new Random();
         protected int X1 = -10;
         protected int X2 = 10;
         protected int Y1 = -10;
@@ -33,27 +33,28 @@ namespace GeneticAlgorithm
 
         protected void Render()
         {
-            richTextBox1.Text = "\t";
+            string logs = "";
+            logs = "\t";
             for (int x = X1; x <= X2; x++)
-                richTextBox1.Text += x + "\t";
-            richTextBox1.Text += "\n";
+                logs += x + "\t";
+            logs += Environment.NewLine;
 
             for (int y = Y1; y <= Y2; y++)
             {
-                richTextBox1.Text += y + "\t";
+                logs += y + "\t";
 
                 for (int x = X1; x <= X2; x++)
                 {
-                    richTextBox1.Text += f(x, y) + "\t";
+                    logs += f(x, y) + "\t";
                 }
-                richTextBox1.Text += '\n';
+                logs += Environment.NewLine;
 
             }
+            richTextBox1.Text = logs;
         }
 
         protected Point GetPoint()
         {
-            var r = new Random();
             return new Point(r.Next(X1, X2), r.Next(Y1, Y2));
         }
 
@@ -149,7 +150,7 @@ namespace GeneticAlgorithm
         protected int Algorithm(int countChromosomes, int maxIteration)
         {
             Point[] chromosomes = GenerateArray(countChromosomes);
-
+            string logs = "";
             int iteration = 0;
             double min = MinFunction(chromosomes);
             List<double> history = new List<double> ();
@@ -164,14 +165,15 @@ namespace GeneticAlgorithm
                     chromosomes = GenerateArray(countChromosomes);
                     min = MinFunction(chromosomes);
                     history.Clear();
-                    richTextBox1.Text += "Произошла встряска\n";
+                    logs += "Произошла встряска"+ Environment.NewLine;
                 }
 
                 history.Add(min);
 
                 iteration++;
-                richTextBox1.Text += GetDescriptionIteration(iteration, chromosomes) + $"Минимум: {min}\n";
+                logs += GetDescriptionIteration(iteration, chromosomes) + $"Минимум: {min}" + Environment.NewLine;
             }
+            richTextBox1.Text += logs;
 
             iterationCount.Text = $"Результат за {iteration} итераций";
             return iteration;
@@ -219,7 +221,7 @@ namespace GeneticAlgorithm
         }
 
         protected string GetDescriptionIteration(int iteration, Point[] points)
-            => $"\nИтерация: {iteration}\n{string.Join(", ", points.Select(p => GetDescriptionForPoint(p)))}\n";
+            => $"{Environment.NewLine}Итерация: {iteration}{Environment.NewLine}{string.Join(", ", points.Select(p => GetDescriptionForPoint(p)))}{Environment.NewLine}";
         protected string GetDescriptionForPoint(Point p)
             => $"f({p.X}, {p.Y}) = {f(p.X, p.Y)}";
 
