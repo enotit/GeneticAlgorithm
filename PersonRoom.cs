@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using GeneticAlgorithm.Items;
-using System.Threading.Tasks;
 
 namespace GeneticAlgorithm
 {
@@ -18,7 +15,7 @@ namespace GeneticAlgorithm
             new TV(new Point(1,2)),
             new Table(new Point(2,2)),
             new Sofa(new Point(4,2)),
-            new FloorLamp(new Point(4, 2)),
+            new FloorLamp(new Point(4, 4)),
             new Wardrobe(new Point(1, 7)),
         };
 

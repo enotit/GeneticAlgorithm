@@ -1,6 +1,7 @@
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 namespace GeneticAlgorithm
@@ -26,11 +27,11 @@ namespace GeneticAlgorithm
         {
             if (CachedWeight == -1f) 
             {
-                CachedWeight = Algorithm(items);
+                CachedWeight = Algorithm(items.Where(i => i != this).ToArray());
                 foreach (Item item in items)
                 {
                     if (item != this) { 
-                        CachedWeight += IsCollision(item) ? SizeWidth + SizeLength : 0;
+                        CachedWeight += IsCollision(item) ? (SizeWidth + SizeLength) * 10000 : 0;
                     }
                 }
             }
@@ -45,7 +46,7 @@ namespace GeneticAlgorithm
         }
 
         public bool IsCollision(Item item)
-        => CurrentPosition.X < item.CurrentPosition.X + item.SizeLength && CurrentPosition.X + SizeLength > item.CurrentPosition.X &&
-            CurrentPosition.Y < item.CurrentPosition.Y + item.SizeWidth && CurrentPosition.Y + SizeWidth > item.CurrentPosition.Y;
+        => CurrentPosition.X < item.CurrentPosition.X + item.SizeWidth && CurrentPosition.X + SizeWidth > item.CurrentPosition.X &&
+            CurrentPosition.Y < item.CurrentPosition.Y + item.SizeLength && CurrentPosition.Y + SizeLength > item.CurrentPosition.Y;
     }
 }
